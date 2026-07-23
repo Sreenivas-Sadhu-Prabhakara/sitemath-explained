@@ -1,0 +1,24 @@
+{
+  "name": "sitemath explained",
+  "short_name": "sitemath explained",
+  "description": "An animated explainer of sitemath, the paint and tile quantity calculator: how room measurements become net paintable area, an honest min–max litres range from a cited coverage band, real tin/bag/box counts and tile totals — and why the plan cannot leave your browser.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#E9EAE6",
+  "theme_color": "#E9EAE6",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

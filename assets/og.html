@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --ground: #E9EAE6;
+    --ground2: #DEDFDA;
+    --card: #F5F6F2;
+    --line: #C9CCC5;
+    --ink: #1B1D1E;
+    --muted: #5C6266;
+    --tape: #F7C600;
+    --tape-edge: #A88600;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative;
+    background:
+      linear-gradient(180deg, #ECEDE9 0%, var(--ground) 55%, var(--ground2) 100%);
+    font-family: var(--sans);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* faint construction grid on the concrete field */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(27,29,30,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,29,30,0.035) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ---- THE TAPE BLADE: a yellow steel strip with carbon ticks + end hook,
+       running across the concrete field, the wordmark stamped on it ---- */
+  .blade {
+    position: absolute;
+    left: 0; top: 118px;
+    width: 1010px; height: 120px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 3px, rgba(27,29,30,0.9) 3px 5px, transparent 5px 40px),
+      repeating-linear-gradient(90deg, transparent 0 3px, rgba(27,29,30,0.55) 3px 5px, transparent 5px 160px),
+      var(--tape);
+    background-size: 40px 26px, 160px 42px, auto;
+    background-repeat: repeat-x;
+    background-position: left top, left top, 0 0;
+    border-top: 3px solid rgba(255,255,255,0.35);
+    border-bottom: 5px solid var(--tape-edge);
+    display: flex; align-items: center;
+    padding-left: 88px;
+    box-shadow: 0 26px 50px -30px rgba(27,29,30,0.55);
+  }
+  .blade .stamp {
+    display: flex; align-items: baseline; gap: 20px;
+    margin-top: 22px; /* clear the graduation ticks along the top edge */
+  }
+  .blade .word { font-size: 74px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink); }
+  .blade .word em { font-style: normal; font-weight: 650; color: rgba(27,29,30,0.62); }
+  .blade .hook {
+    position: absolute; right: -6px; top: 8px;
+    width: 26px; height: 104px; background: var(--ink); border-radius: 3px;
+    box-shadow: -3px 0 0 rgba(255,255,255,0.25) inset;
+  }
+
+  .frame {
+    position: absolute; inset: 300px 74px 54px 74px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 54px;
+  }
+  .headline { flex: 1; }
+  .headline h1 {
+    font-size: 52px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.12;
+    max-width: 15ch;
+  }
+  .headline p {
+    margin-top: 18px; font-size: 25px; font-weight: 500; color: var(--muted);
+    line-height: 1.36; max-width: 26ch;
+  }
+
+  /* the worked-example flow — the calculator's own arithmetic */
+  .flow { width: 388px; display: flex; flex-direction: column; gap: 0; }
+  .fcard {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 13px;
+    padding: 15px 22px;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 20px 44px -30px rgba(27,29,30,0.5);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .fcard .k { font-size: 21px; font-weight: 650; color: var(--muted); }
+  .fcard .k b { color: var(--ink); font-weight: 800; }
+  .fcard .v { font-size: 24px; font-weight: 800; color: var(--ink); }
+  .arrow {
+    align-self: center; height: 22px; width: 4px; margin: 2px 0;
+    background: var(--tape-edge); border-radius: 2px; position: relative;
+  }
+  .arrow::after {
+    content: ""; position: absolute; left: 50%; bottom: -2px;
+    width: 11px; height: 11px; border-right: 4px solid var(--tape-edge);
+    border-bottom: 4px solid var(--tape-edge);
+    transform: translateX(-50%) rotate(45deg); border-radius: 2px;
+  }
+  .fcard.buy {
+    background: var(--tape); border: 2px solid var(--tape-edge);
+  }
+  .fcard.buy .k, .fcard.buy .v { color: var(--ink); }
+
+  .chips { position: absolute; left: 74px; bottom: 22px; display: flex; gap: 12px; }
+  .chip {
+    border: 1.5px solid var(--line);
+    background: rgba(245,246,242,0.7);
+    border-radius: 999px;
+    padding: 10px 19px;
+    font-size: 20px; font-weight: 650; color: var(--muted);
+  }
+  .chip.hot { border-color: var(--tape-edge); color: var(--ink); font-family: var(--mono); font-weight: 600; font-size: 18px; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+
+  <div class="blade">
+    <div class="stamp">
+      <span class="word">sitemath <em>explained</em></span>
+    </div>
+    <div class="hook"></div>
+  </div>
+
+  <div class="frame">
+    <div class="headline">
+      <h1>From room measurements to a buy list.</h1>
+      <p>Net area ÷ a cited coverage band → an honest range → real tins, bags &amp; boxes. Quantities, never prices.</p>
+    </div>
+    <div class="flow" aria-hidden="true">
+      <div class="fcard"><span class="k"><b>1</b> · Net wall</span><span class="v">38.67 m²</span></div>
+      <div class="arrow"></div>
+      <div class="fcard"><span class="k"><b>2</b> · ÷ 130–150 sq.ft/L</span><span class="v">2.77–3.20 L</span></div>
+      <div class="arrow"></div>
+      <div class="fcard buy"><span class="k"><b>3</b> · Buy</span><span class="v">1 × 4 L tin</span></div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">animated walkthrough</span>
+    <span class="chip">every coefficient cited</span>
+    <span class="chip hot">connect-src 'none'</span>
+  </div>
+</body>
+</html>

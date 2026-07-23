@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'">
+  <title>sitemath explained — how the paint &amp; tile quantity calculator works</title>
+  <meta name="description" content="How sitemath turns room measurements into a buy list: net paintable area, a cited coverage band divided into an honest min–max litres range, rounded up to real tins, plus tile counts with wastage and box-of-N math — an animated walkthrough of the real arithmetic.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://sreenivas-sadhu-prabhakara.github.io/sitemath-explained/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="Sreenivas Sadhu Prabhakara">
+  <meta name="keywords" content="how sitemath works, paint quantity calculator explained, how much paint do I need, wall area minus door window, paint coverage per litre, round up to tin sizes, tiles per box calculator, wastage percent tiles, TDS coverage band, offline paint calculator">
+  <meta name="theme-color" content="#17191B" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#E9EAE6" media="(prefers-color-scheme: light)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="sitemath explained">
+  <meta property="og:title" content="sitemath explained — how the paint &amp; tile quantity calculator works">
+  <meta property="og:description" content="Measure the room. Divide by a cited coverage band. Round up to real tins. Count the tiles with wastage. An animated walkthrough of the exact arithmetic — and why your house plan never leaves the browser.">
+  <meta property="og:url" content="https://sreenivas-sadhu-prabhakara.github.io/sitemath-explained/">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:image" content="https://sreenivas-sadhu-prabhakara.github.io/sitemath-explained/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="sitemath explained — from room measurements to a buy list">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="sitemath explained — how the paint &amp; tile quantity calculator works">
+  <meta name="twitter:description" content="Measure the room, divide by a cited coverage band, round up to real tins, count the tiles. An animated walkthrough of the real arithmetic — nothing leaves your browser.">
+  <meta name="twitter:image" content="https://sreenivas-sadhu-prabhakara.github.io/sitemath-explained/og-image.png">
+  <meta name="twitter:image:alt" content="sitemath explained — from room measurements to a buy list">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <!-- Structured data (data blocks; not executable script) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "sitemath explained",
+    "description": "An animated explainer for sitemath, the free paint and tile quantity calculator: how room measurements become net paintable area, an honest min–max litres range from a cited coverage band, real tin/bag/box counts, and tile counts with wastage — every coefficient cited and overridable, and a strict Content-Security-Policy keeping the plan in the browser.",
+    "url": "https://sreenivas-sadhu-prabhakara.github.io/sitemath-explained/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any (modern web browser)",
+    "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+    "license": "https://opensource.org/licenses/MIT",
+    "author": { "@type": "Person", "name": "Sreenivas Sadhu Prabhakara" },
+    "softwareVersion": "0.1.0",
+    "featureList": [
+      "Animated walkthrough of net paintable area (walls minus openings; ceiling unaffected)",
+      "Interactive band divider: coverage band to an honest min–max litres range",
+      "The pack-fill minimizer explained: round worst-case up to real tins",
+      "Tile counts with wastage % and box-of-N math in integer-millimetre arithmetic",
+      "Why every coefficient is cited to its TDS and yours to override",
+      "The connect-src 'none' privacy guarantee, enforced by the browser"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does sitemath work out how much paint I need?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It measures the room (2 × (length + width) × height for the walls), subtracts each door and window area from the wall area only, then divides that net area by the paint's published coverage band. Because coverage is a band — for example 130–150 sq.ft per litre for two coats — the result is an honest min–max litres range, and sitemath rounds the worst case up to real tin sizes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do door and window deductions reduce the ceiling paint too?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Openings are cut out of the wall area only. The ceiling is length × width and is never reduced by a door or window — a common mistake sitemath is careful not to make."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does sitemath show a range and round up to whole tins?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Coverage varies with surface porosity, texture and application, so the manufacturer publishes a band rather than one number. sitemath shows the honest min–max range, then rounds the worst-case litres up to real pack sizes with a minimizer that prefers the least total volume that still covers the need, then the fewest tins, then the larger tin. You buy against the worst case; the best case shows what you might get away with on an ideal surface."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does my room data leave the browser?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Both sitemath and this explainer ship a Content-Security-Policy with connect-src 'none', which makes the browser itself block every network request the page could attempt. There is no server, no account and no analytics; the privacy is enforced by policy, not merely promised."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="blade-top" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="topbar">
+        <div class="brand">
+          <svg class="brand-mark" width="44" height="44" viewBox="0 0 48 48" aria-hidden="true">
+            <rect x="1" y="1" width="46" height="46" rx="10" fill="#1B1D1E"/>
+            <g transform="rotate(-18 24 24)">
+              <rect x="2" y="19" width="40" height="11" rx="1.5" fill="#F7C600"/>
+              <rect x="40" y="16" width="4" height="17" rx="1" fill="#1B1D1E"/>
+              <rect x="9"  y="19" width="2" height="6" fill="#1B1D1E"/>
+              <rect x="19" y="19" width="2" height="8" fill="#1B1D1E"/>
+              <rect x="29" y="19" width="2" height="6" fill="#1B1D1E"/>
+            </g>
+          </svg>
+          <span class="brand-name">sitemath <em>explained</em></span>
+        </div>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false">
+          <span class="theme-toggle-icon" aria-hidden="true">◐</span> Theme
+        </button>
+      </div>
+
+      <h1>Paint &amp; tile quantities, explained — how sitemath turns room measurements into a buy list</h1>
+      <p class="lede">
+        No guessing, no "buy a bit extra and hope". You measure the room; sitemath subtracts the
+        openings, divides by a <strong>coverage number cited to its manufacturer sheet</strong>,
+        and rounds the worst case up to real tins, bags and boxes. This page walks through the exact
+        arithmetic — with the same numbers the calculator computes.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://sreenivas-sadhu-prabhakara.github.io/sitemath/">Open sitemath — it's free</a>
+        <a class="btn btn-ghost" href="#how">See how it works ↓</a>
+      </div>
+      <ul class="hero-chips">
+        <li>every coefficient cited &amp; overridable</li>
+        <li>honest min–max ranges</li>
+        <li>quantities, never prices</li>
+        <li>offline &amp; private by enforcement</li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============ THE PROBLEM ============ -->
+    <section class="section" id="problem" aria-labelledby="problem-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="problem-h">The hardware-shop problem: how much do I actually buy?</h2>
+        <div class="prose">
+          <p>
+            You're standing at the paint counter. The room is measured, sort of. The dealer says
+            "one 4-litre will do it" — but on what coverage, for how many coats, over how much wall
+            once the door and windows are out? And do you believe the number, or the tin?
+          </p>
+          <p>
+            Most online calculators answer with <strong>one confident figure</strong> and no working.
+            That figure is either a guess dressed up as precision, or it quietly rounds a mystery
+            coverage you can't see or change.
+          </p>
+          <p>
+            sitemath does the opposite: it shows <strong>every number, every source, every step</strong>,
+            gives you an honest range rather than false precision, and rounds up to the packs the shop
+            actually sells. Here's the whole mechanism.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS — ANIMATED SCENES ============ -->
+    <section class="section section-alt" id="how" aria-labelledby="how-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="how-h">How it works: one 4.0 × 3.0 m room, end to end</h2>
+        <p class="section-lede">A real worked example — the same numbers this page's <code>node --test</code>
+        self-tests re-derive, to the square metre and the litre.</p>
+
+        <!-- Scene 1: measure the room -->
+        <article class="scene anim" aria-labelledby="scene1-h">
+          <div class="scene-copy">
+            <p class="scene-kicker"><span class="scene-num">1</span> Measure the room</p>
+            <h3 id="scene1-h">Net paintable area = walls − openings (ceiling untouched)</h3>
+            <p>Walls are <span class="mono">2 × (L + W) × H</span>. Each door and window area comes off
+            the <em>wall</em> total only. The ceiling is <span class="mono">L × W</span> and a door
+            never shrinks it — a mistake sitemath is careful not to make.</p>
+            <button type="button" class="replay" data-replay="scene1" aria-label="Replay scene 1 animation">↻ Replay</button>
+          </div>
+          <figure class="scene-fig">
+            <figcaption class="fig-title">Area readout</figcaption>
+            <div class="area-rows">
+              <div class="arow s1">
+                <span class="aname">Gross wall <small>2 × (4.0 + 3.0) × 3.0</small></span>
+                <span class="abar"><span class="fill fill-wall w100"></span></span>
+                <span class="anum num">42.00 m²</span>
+              </div>
+              <div class="arow s2">
+                <span class="aname">− Door <small>0.9 × 2.1</small></span>
+                <span class="abar"><span class="fill fill-cut w-door"></span></span>
+                <span class="anum num">−1.89 m²</span>
+              </div>
+              <div class="arow s3">
+                <span class="aname">− Window <small>1.2 × 1.2</small></span>
+                <span class="abar"><span class="fill fill-cut w-win"></span></span>
+                <span class="anum num">−1.44 m²</span>
+              </div>
+              <div class="arow s4 arow-sub">
+                <span class="aname">Net wall</span>
+                <span class="abar"><span class="fill fill-net w-net"></span></span>
+                <span class="anum num"><strong>38.67 m²</strong></span>
+              </div>
+              <div class="arow s5">
+                <span class="aname">+ Ceiling <small>L × W, deductions never apply</small></span>
+                <span class="abar"><span class="fill fill-ceil w-ceil"></span></span>
+                <span class="anum num">+12.00 m²</span>
+              </div>
+            </div>
+            <div class="blade-readout" aria-hidden="true"></div>
+            <p class="fig-foot">Net paintable total <strong class="num">50.67 m²</strong> — walls for topcoat, ceiling added where you paint it.</p>
+          </figure>
+        </article>
+
+        <!-- Scene 2: area ÷ cited band → min–max litres -->
+        <article class="scene anim" aria-labelledby="scene2-h">
+          <div class="scene-copy">
+            <p class="scene-kicker"><span class="scene-num">2</span> Divide by a cited coverage band</p>
+            <h3 id="scene2-h">A band in, an honest min–max range out</h3>
+            <p>The topcoat here is an economy interior emulsion, cited at
+            <strong>130–150 sq.ft/L for 2 coats</strong> (Asian Paints Tractor Emulsion PIS, verified
+            2026-07-23). Divide the wall area by the band and you get a range — not one fake-precise
+            number. <strong>The worst case uses the band's <em>lowest</em> coverage</strong>, so you
+            plan for the thirsty wall.</p>
+            <button type="button" class="replay" data-replay="scene2" aria-label="Replay scene 2 animation">↻ Replay</button>
+          </div>
+          <figure class="scene-fig">
+            <figcaption class="fig-title">38.67 m² of wall ÷ band, 2 coats
+              <span class="cite-chip"><span class="dot"></span>cited TDS</span></figcaption>
+            <div class="band-viz">
+              <div class="band-row s1">
+                <span class="band-lab">Best case <small>band max, 150 sq.ft/L</small></span>
+                <span class="band-track"><span class="band-fill band-best w-best"></span></span>
+                <span class="band-val num">2.77 L</span>
+              </div>
+              <div class="band-row s2">
+                <span class="band-lab">Worst case <small>band min, 130 sq.ft/L</small></span>
+                <span class="band-track"><span class="band-fill band-worst w-worst"></span></span>
+                <span class="band-val num"><strong>3.20 L</strong></span>
+              </div>
+            </div>
+            <p class="fig-foot">Real consumption lives <em>inside</em> this band — porosity, texture and
+            method decide where. sitemath never pretends to know which; it buys against the top.</p>
+          </figure>
+        </article>
+
+        <!-- Scene 3: pack-fill minimizer -->
+        <article class="scene anim" aria-labelledby="scene3-h">
+          <div class="scene-copy">
+            <p class="scene-kicker"><span class="scene-num">3</span> Round up to real packs</p>
+            <h3 id="scene3-h">The pack-fill minimizer: buy the shop's tins, not a decimal</h3>
+            <p>You can't buy 3.20 litres. So sitemath rounds the <strong>worst case</strong> up across
+            the real tin ladder — <span class="mono">1 / 4 / 10 / 20 L</span> — choosing the
+            <strong>least total volume that still covers the need</strong>, then the fewest tins, then
+            the larger tin. Here that's a single <strong>4 L tin</strong>.</p>
+            <button type="button" class="replay" data-replay="scene3" aria-label="Replay scene 3 animation">↻ Replay</button>
+          </div>
+          <figure class="scene-fig">
+            <figcaption class="fig-title">Need 3.20 L → the tin ladder</figcaption>
+            <div class="tins">
+              <div class="tin s1 tin-out"><span class="tin-cap">20 L</span><span class="tin-why">overshoots</span></div>
+              <div class="tin s2 tin-out"><span class="tin-cap">10 L</span><span class="tin-why">overshoots</span></div>
+              <div class="tin s3 tin-pick"><span class="tin-cap">4 L</span><span class="tin-why">✓ least ≥ 3.20</span></div>
+              <div class="tin s4 tin-out"><span class="tin-cap">3 × 1 L</span><span class="tin-why">only 3 L — short</span></div>
+            </div>
+            <div class="blade-readout small" aria-hidden="true"></div>
+            <p class="fig-foot">Buy: <strong class="buy-chip num">1 × 4 L tin</strong>. The best-case 2.77 L
+            would fit in three 1 L tins — but an ideal surface is not the one to bet a repaint on.</p>
+          </figure>
+        </article>
+
+        <!-- Scene 4: tiles -->
+        <article class="scene anim" aria-labelledby="scene4-h">
+          <div class="scene-copy">
+            <p class="scene-kicker"><span class="scene-num">4</span> Tiles: area → boxes + spares</p>
+            <h3 id="scene4-h">Floor area + wastage %, then box-of-N — one round-up, integer millimetres</h3>
+            <p>The 12.00 m² floor in <strong>600 × 600 mm</strong> tiles, at <strong>5% straight-lay
+            wastage</strong>, works out to <strong>35 tiles</strong> in exact integer-mm math with a
+            single round-up. Divide by 4 tiles a box and round up once more:
+            <strong>9 boxes, 1 spare</strong> for future breakages.</p>
+            <button type="button" class="replay" data-replay="scene4" aria-label="Replay scene 4 animation">↻ Replay</button>
+          </div>
+          <figure class="scene-fig">
+            <figcaption class="fig-title">12.00 m² · 600 × 600 mm · 5% wastage</figcaption>
+            <div class="tile-steps">
+              <div class="tstep s1"><span class="tstep-k">Bare tiles <small>12 ÷ 0.36</small></span><span class="tstep-v num">33.33</span></div>
+              <div class="tstep s2"><span class="tstep-k">× 1.05 wastage, one ceil</span><span class="tstep-v num"><strong>35</strong> tiles</span></div>
+              <div class="tstep s3"><span class="tstep-k">÷ 4 per box, round up</span><span class="tstep-v num"><strong>9</strong> boxes</span></div>
+            </div>
+            <div class="tile-grid s4" aria-hidden="true"></div>
+            <p class="fig-foot">Buy: <strong class="buy-chip num">9 boxes of 4</strong> — 36 tiles, 35 laid,
+            <strong>1 spare</strong>. Diagonal lay defaults to 10% and needs 37 tiles (10 boxes).</p>
+          </figure>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ EVERY COEFFICIENT CITED ============ -->
+    <section class="section" id="cited" aria-labelledby="cited-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="cited-h">Every coefficient is tap-to-see-its-source — and yours to override</h2>
+        <p class="section-lede">The whole point of sitemath: no hidden magic numbers. Each coverage band,
+        pack ladder and wastage default carries where it came from, when it was checked, and a one-tap
+        override for the figure on <em>your</em> tin.</p>
+
+        <div class="cite-grid">
+          <article class="card cite-card anim">
+            <span class="cite-badge ok">verified</span>
+            <h3>Coverage bands</h3>
+            <p>Read from the manufacturer's Technical Data Sheet — e.g. <em>"2 COATS 130–150 sq.ft/ltr"</em>
+            from the Asian Paints Tractor Emulsion PIS — with the verbatim quote, source URL and a
+            verified-on date. The PDFs are staged in the repo's <code>sources/</code>.</p>
+          </article>
+          <article class="card cite-card anim">
+            <span class="cite-badge beta">beta</span>
+            <h3>Unconfirmed figures, flagged</h3>
+            <p>Where a manufacturer page publishes no coverage number, the band comes from a named
+            secondary listing and is marked <strong>beta</strong> in the app — visibly, and asking you
+            to override it with your tin's real TDS figure. Nothing is invented to fill a gap.</p>
+          </article>
+          <article class="card cite-card anim">
+            <span class="cite-badge conv">convention</span>
+            <h3>Stated conventions</h3>
+            <p>The 5% / 10% tile wastage and the suggested door/window sizes are <em>conventions</em>,
+            not published specs, and say so. They're editable per project — measure your own openings,
+            set your fixer's real allowance.</p>
+          </article>
+          <article class="card cite-card anim">
+            <span class="cite-badge yours">your value</span>
+            <h3>Your override wins</h3>
+            <p>Tap any coefficient, type the number off your product, and it flows through every result
+            immediately — marked as <strong>your value</strong> wherever it's used. The cited default is
+            a starting point, not a cage.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUANTITIES NOT PRICES ============ -->
+    <section class="section section-alt" id="scope" aria-labelledby="scope-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="scope-h">Quantities only — never prices</h2>
+        <div class="prose">
+          <p>
+            sitemath tells you <strong>how much to buy</strong>: litres, kilograms, tins, bags, boxes.
+            It deliberately says nothing about <strong>cost</strong>. Rates swing by market, dealer,
+            city and day; a price baked into a calculator is stale the moment it ships and invites
+            arguments at the counter.
+          </p>
+          <p>
+            So the output is a clean material list you carry to any shop, and the bill is theirs to
+            write. That single boundary keeps the tool honest and keeps it useful everywhere prices differ.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRIVACY ============ -->
+    <section class="section" id="privacy" aria-labelledby="privacy-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="privacy-h">Privacy that is enforced, not promised</h2>
+        <p class="section-lede">Your house plan is nobody's business. sitemath doesn't just <em>say</em> it
+        won't send your data — it ships a policy that makes the <strong>browser itself</strong> refuse to.</p>
+
+        <div class="privacy-wrap">
+          <figure class="privacy-fig anim" aria-labelledby="privacy-fig-cap">
+            <svg viewBox="0 0 560 240" role="img" aria-label="Diagram: a network request from the sitemath page toward the internet is stopped at a wall labelled connect-src none; the project data stays in the browser's local storage.">
+              <rect x="16" y="40" width="220" height="160" rx="14" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+              <rect x="16" y="40" width="220" height="34" rx="14" fill="var(--card2)" stroke="var(--line)" stroke-width="2"/>
+              <circle cx="40" cy="57" r="5" fill="var(--tape)"/>
+              <circle cx="58" cy="57" r="5" fill="var(--line)"/>
+              <circle cx="76" cy="57" r="5" fill="var(--line)"/>
+              <text x="126" y="106" class="svg-label" text-anchor="middle">your browser</text>
+              <rect x="46" y="124" width="160" height="52" rx="8" fill="var(--card2)" stroke="var(--line)" stroke-width="1.5"/>
+              <text x="126" y="146" class="svg-small" text-anchor="middle">localStorage</text>
+              <text x="126" y="166" class="svg-small svg-strong" text-anchor="middle">sitemath.v1 ✓</text>
+              <g class="req">
+                <line x1="248" y1="120" x2="380" y2="120" stroke="var(--tape)" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 8" class="req-line"/>
+                <circle cx="380" cy="120" r="9" fill="var(--tape)" stroke="var(--ink)" stroke-width="1.5" class="req-dot"/>
+              </g>
+              <rect x="396" y="52" width="14" height="136" rx="4" fill="var(--danger)"/>
+              <text x="403" y="216" class="svg-small svg-strong" text-anchor="middle">connect-src 'none'</text>
+              <g class="blocked-x">
+                <line x1="386" y1="104" x2="418" y2="136" stroke="var(--danger)" stroke-width="5" stroke-linecap="round"/>
+                <line x1="418" y1="104" x2="386" y2="136" stroke="var(--danger)" stroke-width="5" stroke-linecap="round"/>
+              </g>
+              <g class="cloud">
+                <ellipse cx="492" cy="118" rx="52" ry="30" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 6"/>
+                <text x="492" y="124" class="svg-small" text-anchor="middle">internet</text>
+              </g>
+            </svg>
+            <figcaption id="privacy-fig-cap" class="fig-caption">Every request the page could ever make — blocked before it leaves.</figcaption>
+          </figure>
+
+          <div class="prose">
+            <p>The page's <code>Content-Security-Policy</code> includes:</p>
+            <pre class="csp-block"><code>default-src 'self'; <strong>connect-src 'none'</strong></code></pre>
+            <ul class="check-list">
+              <li><strong>No network calls possible</strong> — <code>fetch</code>, XHR and WebSockets are all refused by the browser, by policy.</li>
+              <li><strong>No server, no account, no analytics</strong> — there is nothing to log in to and nothing watching.</li>
+              <li><strong>localStorage only</strong> — your rooms, measurements and overrides live in this browser under one key.</li>
+              <li><strong>Print, CSV and JSON export are the only exits</strong> — files you download on purpose; they are also your only backup, so export regularly.</li>
+            </ul>
+            <p class="fineprint">The honest flip side: clearing site data or switching devices loses your projects. There is no cloud copy — by design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="section section-alt" id="features" aria-labelledby="features-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="features-h">What's in the app</h2>
+        <div class="feature-grid">
+          <article class="card feat">
+            <h3>Room measurer</h3>
+            <p>Metres or feet (exact 0.3048 m/ft), multiple rooms, per-room door/window deductions and a
+            ceiling toggle — with the running net paintable area under a tape-blade readout.</p>
+          </article>
+          <article class="card feat">
+            <h3>Paint system</h3>
+            <p>Putty, primer and topcoat, each carrying its own cited coverage band. Coats are editable —
+            set what your painter actually quotes — and putty is a total-application figure, not multiplied.</p>
+          </article>
+          <article class="card feat">
+            <h3>Shopping list in real packs</h3>
+            <p>Best case, worst case, and a <em>buy</em> column rounded to 1/4/10/20 L tins and 5/40 kg
+            putty bags by the pack-fill minimizer. Quantities only — never prices.</p>
+          </article>
+          <article class="card feat">
+            <h3>Tile calculator</h3>
+            <p>Area from a room or entered directly, catalogue tile sizes or custom mm, straight/diagonal
+            wastage, tiles-per-box — all in integer-mm arithmetic with a single round-up.</p>
+          </article>
+          <article class="card feat">
+            <h3>Every coefficient, sourced</h3>
+            <p>A full corpus list with verbatim TDS quotes, source URLs, verified-on dates, beta flags for
+            unconfirmed figures, and one-tap overrides that flow everywhere.</p>
+          </article>
+          <article class="card feat">
+            <h3>Print, CSV &amp; JSON</h3>
+            <p>An A4 site list to hand to the shop, RFC-4180 CSV export, and a full JSON backup/restore —
+            the only ways data leaves, and your backup.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HONEST LIMITS ============ -->
+    <section class="section" id="limits" aria-labelledby="limits-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="limits-h">What sitemath honestly is not</h2>
+        <ul class="limits-list">
+          <li><strong>Not a guarantee.</strong> Coverage bands are manufacturer figures for ideal, properly
+          prepared surfaces; porosity, texture, thinning and method push real consumption outside the band.
+          Buy against the worst case and treat every output as an estimate.</li>
+          <li><strong>Not a site survey.</strong> Dado heights, damaged plaster, extra putty coats and repair
+          quantities are contractor judgment calls the app cannot make and does not fake.</li>
+          <li><strong>Not a price quote.</strong> Quantities only — rates vary by market, dealer and day, and
+          the shop's bill is the price.</li>
+          <li><strong>Only as good as your measurements.</strong> A wrong length or a missed opening flows
+          straight through; measure twice.</li>
+          <li><strong>Conventions are defaults, not law.</strong> Suggested opening sizes and tile-wastage
+          percentages are stated conventions — measure your own, and override anything that isn't right.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section section-alt" id="faq" aria-labelledby="faq-h">
+      <div class="section-inner">
+        <span class="tick-run" aria-hidden="true"></span>
+        <h2 id="faq-h">Questions people ask</h2>
+        <details class="faq-item">
+          <summary>How does sitemath work out how much paint I need?</summary>
+          <p>Walls are <code>2 × (L + W) × H</code>; each door and window area comes off the wall total only;
+          that net area is divided by the paint's published coverage band. Because coverage is a band
+          (e.g. 130–150 sq.ft/L for 2 coats), you get an honest min–max litres range, and the worst case is
+          rounded up to real tins.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do door and window deductions reduce the ceiling paint too?</summary>
+          <p>No. Openings are cut out of the wall area only. The ceiling is <code>L × W</code> and is never
+          reduced by a door or window.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why a range, and why round up to whole tins?</summary>
+          <p>Real consumption depends on the surface, so the manufacturer publishes a band, not one number.
+          sitemath shows the range and rounds the worst case up with a minimizer that prefers the least total
+          volume that covers the need, then the fewest tins, then the larger tin. You buy against the worst case.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does my room data leave the browser?</summary>
+          <p>No — and it can't. Both sitemath and this page ship a Content-Security-Policy with
+          <code>connect-src 'none'</code>, so the browser itself blocks every network request. No server, no
+          account, no analytics; localStorage only, with print/CSV/JSON export as your backups.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="section cta-section" id="cta" aria-labelledby="cta-h">
+      <div class="section-inner cta-inner">
+        <h2 id="cta-h">Measure the room. Get the buy list.</h2>
+        <p>Free, offline, MIT-licensed. Every coefficient shown and cited, every result an honest range
+        rounded up to real packs — quantities only, and nothing leaves your browser.</p>
+        <a class="btn btn-primary btn-big" href="https://sreenivas-sadhu-prabhakara.github.io/sitemath/">Open sitemath →</a>
+        <p class="cta-sub"><a href="https://github.com/Sreenivas-Sadhu-Prabhakara/sitemath">Source code &amp; corpus citations on GitHub</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-inner">
+      <div class="blade-mini" aria-hidden="true"></div>
+      <p><strong>Disclaimer.</strong> This explainer and the sitemath app are informational estimating aids
+      provided "as is", without warranty of any kind. They are not professional advice, a site survey or a
+      quotation. Quantities are estimates for ideal, properly prepared surfaces derived from
+      manufacturer-published coverage bands; actual consumption varies. Buy against the worst-case figure and
+      confirm quantities with your painter or contractor before purchase. The author accepts no liability for
+      decisions made using these tools.</p>
+      <p>All numbers on this page run in your browser; this page makes no network requests
+      (<code>connect-src 'none'</code>) and stores only your theme choice locally.</p>
+      <p><a href="https://sreenivas-sadhu-prabhakara.github.io/sitemath/">sitemath app</a> ·
+        <a href="https://github.com/Sreenivas-Sadhu-Prabhakara/sitemath-explained">this page's source</a> ·
+        MIT License © 2026 Sreenivas Sadhu Prabhakara</p>
+    </div>
+  </footer>
+
+  <script src="data/facts.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
